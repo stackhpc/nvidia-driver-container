@@ -1,0 +1,7 @@
+#!/bin/bash
+docker run -it --rm --name nvidia-system \
+  -v /etc/modprobe.d:/etc/modprobe.d \
+  -v /lib/modules/`uname -r`:/lib/modules/`uname -r` \
+  -v /usr/lib:/usr/lib \
+  -v /usr/lib64:/usr/lib64 \
+  nvidia-system:`uname -r` ./install_nvidia.sh

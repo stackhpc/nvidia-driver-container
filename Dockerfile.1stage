@@ -1,0 +1,49 @@
+FROM fedora:27
+
+LABEL maintainer="Konstantinos Samaras-Tsakiris <kosamara@cern.ch>" \
+      name="nvidia-system-container" \
+      version="0.1" \
+      atomic.type="system" \
+      architecture="x86_64" 
+
+ARG KERNEL_VERSION
+
+WORKDIR /tmp
+
+RUN dnf update -y
+
+RUN dnf install -y binutils cpp gcc koji make unzip wget pkgconfig pciutils && \
+      koji download-build --rpm --arch=x86_64 kernel-core-${KERNEL_VERSION} && \
+      koji download-build --rpm --arch=x86_64 kernel-devel-${KERNEL_VERSION} && \
+      koji download-build --rpm --arch=x86_64 kernel-modules-${KERNEL_VERSION} && \
+      koji download-build --rpm --arch=x86_64 kernel-headers-${KERNEL_VERSION} && \
+      dnf install -y kernel-core-${KERNEL_VERSION}.rpm \
+        kernel-devel-${KERNEL_VERSION}.rpm \
+        kernel-modules-${KERNEL_VERSION}.rpm \
+        kernel-headers-${KERNEL_VERSION}.rpm && \
+      dnf clean all
+
+RUN rpm -i "http://developer.download.nvidia.com/compute/cuda/repos/fedora27/x86_64/cuda-repo-fedora27-9.2.88-1.x86_64.rpm" && \
+      dnf install -y akmod-nvidia
+
+# Get the gcc version that compiled the kernel
+#RUN cat /proc/version | grep -e "gcc version [0-9].[0-9]" -o | awk '{print $3;}' > kernel_gcc_version
+#RUN dnf install -y gcc-$(cat kernel_gcc_version) cpp-$(cat kernel_gcc_version)
+
+# Build the nvidia kernel modules
+# SOURCE: https://wiki.centos.org/HowTos/BuildingKernelModules
+RUN tar xf /usr/share/nvidia-kmod-396.26/nvidia-kmod-396.26-x86_64.tar.xz && \
+      cd kernel && \
+      make -j4 && \
+      strip --strip-debug *ko
+
+RUN mkdir /lib/modules/`uname -r`/extra && \
+      cp /tmp/kernel/*.ko /lib/modules/`uname -r`/extra && \
+      depmod -a
+
+COPY ./install_nvidia.sh .
+#RUN chmod u+x ./install_nvidia.sh
+
+# Will get the nvidia runtime libraries directly when the container runs
+#RUN dnf install -y cuda-libraries-9-2 cuda-minimal-build-9-2 xorg-x11-drv-nvidia-cuda-libs xorg-x11-drv-nvidia-libs
+
