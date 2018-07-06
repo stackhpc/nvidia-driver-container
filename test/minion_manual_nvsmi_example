@@ -1,0 +1,11 @@
+# An example manual container run, to check minions' configs,
+#   locally, without kubernetes
+#
+# Cryptic errors like
+#   "Failed to initialize NVML"
+# can result from omitting the --device , by eg just passing -v /dev:/dev
+sudo docker run --rm -it \
+        --device /dev/nvidia-uvm --device /dev/nvidia0 --device /dev/nvidiactl \
+        -v /opt/nvidia-driver:/usr/local/nvidia \
+        -e PATH=$PATH:/usr/local/nvidia/bin -e LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/nvidia/lib \
+        fedora nvidia-smi

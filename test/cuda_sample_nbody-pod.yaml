@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-sample-nbody
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: cuda-sample-nbody
+      # https://github.com/kubernetes/kubernetes/blob/v1.7.11/test/images/nvidia-cuda/Dockerfile
+      #image: "k8s.gcr.io/cuda-vector-add:v0.1"
+      image: "nvcr.io/nvidia/k8s/cuda-sample:nbody"
+      command: ["nbody", "-benchmark", "-numbodies=204800"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1 # requesting 1 GPU
