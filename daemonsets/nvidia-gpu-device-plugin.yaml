@@ -17,7 +17,6 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      priorityClassName: system-node-critical
       #affinity:
       #  nodeAffinity:
       #    requiredDuringSchedulingIgnoredDuringExecution:
@@ -34,9 +33,25 @@ spec:
       - name: device-plugin
         hostPath:
           path: /var/lib/kubelet/device-plugins
+      - name: nvidia-install-dir-host
+        hostPath:
+          path: /opt/nvidia-driver
       - name: dev
         hostPath:
           path: /dev
+      initContainers:
+      - image: "gitlab-registry.cern.ch/kosamara/nvidia-system-container/nvidia-driver-installer:27@sha256:15c4307593a6e89ce8efde624b1d86ab4c07f10586ee3e93b33b22ce4817b16d"
+        name: nvidia-driver-installer
+        resources:
+          requests:
+            cpu: 0.15
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: nvidia-install-dir-host
+          mountPath: /opt/nvidia-host
+        - name: dev
+          mountPath: /dev
       containers:
       - image: "k8s.gcr.io/nvidia-gpu-device-plugin@sha256:0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e"
         command: ["/usr/bin/nvidia-gpu-device-plugin", "-logtostderr", "-host-path=/opt/nvidia-driver"]
@@ -55,5 +70,6 @@ spec:
           mountPath: /device-plugin
         - name: dev
           mountPath: /dev
+      priorityClassName: system-node-critical
   updateStrategy:
     type: RollingUpdate
