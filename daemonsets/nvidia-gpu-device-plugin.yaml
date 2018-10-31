@@ -43,7 +43,7 @@ spec:
         hostPath:
           path: /dev
       initContainers:
-      - image: "gitlab-registry.cern.ch/kosamara/nvidia-system-container/nvidia-driver-installer:27@sha256:15c4307593a6e89ce8efde624b1d86ab4c07f10586ee3e93b33b22ce4817b16d"
+      - image: "gitlab-registry.cern.ch/kosamara/nvidia-system-container/nvidia-driver-installer:27-4.15.4-300-410.73@sha256:383053744698165211376955f58f4ad4ccae3452303c31d5c12299b2b6dd01b3"
         name: nvidia-driver-installer
         resources:
           requests:
