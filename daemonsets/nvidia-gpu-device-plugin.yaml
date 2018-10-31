@@ -1,3 +1,4 @@
+# Upstream: https://github.com/kubernetes/kubernetes/blob/master/cluster/addons/device-plugins/nvidia-gpu/daemonset.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -17,6 +18,8 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+      priorityClassName: system-node-critical
+      # We don't yet use node selectors because we don't have mixed clusters
       #affinity:
       #  nodeAffinity:
       #    requiredDuringSchedulingIgnoredDuringExecution:
@@ -70,6 +73,5 @@ spec:
           mountPath: /device-plugin
         - name: dev
           mountPath: /dev
-      priorityClassName: system-node-critical
   updateStrategy:
     type: RollingUpdate
