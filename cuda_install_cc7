@@ -1,0 +1,31 @@
+#!/bin/bash
+
+yum install -y tree htop wget vim tmux bash-completion bash-completion-extras git autoconf automake unzip yum-utils pciutils
+yum install -y gcc gcc-c++ make kernel-devel-$(uname -r) kernel-headers-$(uname -r) dkms
+systemctl enable dkms
+systemctl start  dkms
+
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y docker-ce device-mapper-persistent-data lvm2
+systemctl  start docker
+systemctl enable docker
+
+
+### CUDA INSTALL
+export NVIDIA_PATH=/usr/local/nvidia
+curl "http://download.nvidia.com/XFree86/Linux-x86_64/410.73/NVIDIA-Linux-x86_64-410.73.run" -o nv_driver_installer.run
+chmod u+x nv_driver_installer.run
+modprobe -r nouveau && \
+  ./nv_driver_installer.run -z -Z --accept-license --no-questions --ui=none \
+    --no-precompiled-interface --no-drm --x-prefix=/usr --no-install-compat32-libs \
+    --installer-prefix=${NVIDIA_PATH} --utility-prefix=${NVIDIA_PATH} \
+    --opengl-prefix=${NVIDIA_PATH} \ &&
+  mv ${NVIDIA_PATH}/lib ${NVIDIA_PATH}/lib64
+modprobe nvidia && modprobe nvidia-uvm
+LD_LIBRARY_PATH=/usr/local/nvidia/lib64 /usr/local/nvidia/bin/nvidia-smi
+
+curl "https://gitlab.cern.ch/kosamara/nvidia-system-container/raw/coreos/scripts/nvidia-mkdevs" -o nvidia-mkdevs
+chmod 755 nvidia-mkdevs
+./nvidia-mkdevs
+
+# Disable firewalld !!!!!!!
