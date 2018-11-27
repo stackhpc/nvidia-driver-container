@@ -19,14 +19,6 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       priorityClassName: system-node-critical
-      # We don't yet use node selectors because we don't have mixed clusters
-      #affinity:
-      #  nodeAffinity:
-      #    requiredDuringSchedulingIgnoredDuringExecution:
-      #      nodeSelectorTerms:
-      #      - matchExpressions:
-      #        - key: cloud.google.com/gke-accelerator
-      #          operator: Exists
       tolerations:
       - operator: "Exists"
         effect: "NoExecute"
@@ -43,7 +35,8 @@ spec:
         hostPath:
           path: /dev
       initContainers:
-      - image: "gitlab-registry.cern.ch/kosamara/nvidia-system-container/nvidia-driver-installer:27-4.15.4-300-410.73@sha256:383053744698165211376955f58f4ad4ccae3452303c31d5c12299b2b6dd01b3"
+      - image: "gitlab-registry.cern.ch/cloud-infrastructure/nvidia-driver-container/nvidia-driver-installer-fedora:27-4.15.4-300-415.18"
+        imagePullPolicy: Always
         name: nvidia-driver-installer
         resources:
           requests:
