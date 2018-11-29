@@ -19,14 +19,6 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       priorityClassName: system-node-critical
-      # We don't yet use node selectors because we don't have mixed clusters
-      #affinity:
-      #  nodeAffinity:
-      #    requiredDuringSchedulingIgnoredDuringExecution:
-      #      nodeSelectorTerms:
-      #      - matchExpressions:
-      #        - key: cloud.google.com/gke-accelerator
-      #          operator: Exists
       tolerations:
       - operator: "Exists"
         effect: "NoExecute"
@@ -42,12 +34,20 @@ spec:
       - name: dev
         hostPath:
           path: /dev
+      - name: kmod
+        hostPath:
+          path: /usr/lib/modules/3.10.0-862.3.2.el7.x86_64
       initContainers:
-      - image: "gitlab-registry.cern.ch/kosamara/nvidia-system-container/nvidia-driver-installer:27-4.15.4-300-410.73@sha256:383053744698165211376955f58f4ad4ccae3452303c31d5c12299b2b6dd01b3"
+      - image: "gitlab-registry.cern.ch/cloud-infrastructure/nvidia-driver-container/nvidia-driver-installer-centos:7-3.10.0-862-415.18"
         name: nvidia-driver-installer
+        imagePullPolicy: Always
         resources:
           requests:
-            cpu: 0.15
+            memory: "2G"
+            cpu: "1000m"
+          limits:
+            memory: "3G"
+            cpu: "2000m"
         securityContext:
           privileged: true
         volumeMounts:
@@ -55,6 +55,8 @@ spec:
           mountPath: /opt/nvidia-host
         - name: dev
           mountPath: /dev
+        - name: kmod
+          mountPath: /usr/lib/modules/3.10.0-862.3.2.el7.x86_64
       containers:
       - image: "k8s.gcr.io/nvidia-gpu-device-plugin@sha256:0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e"
         command: ["/usr/bin/nvidia-gpu-device-plugin", "-logtostderr", "-host-path=/opt/nvidia-driver"]
