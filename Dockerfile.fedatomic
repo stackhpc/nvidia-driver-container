@@ -1,6 +1,6 @@
 # Nvidia driver installer for Fedora Atomic
 
-ARG FEDORA_VERSION=27
+ARG FEDORA_VERSION=29
 
 FROM fedora:${FEDORA_VERSION} as kmod_builder
 LABEL maintainer="Konstantinos Samaras-Tsakiris <kosamara@cern.ch>" \
@@ -9,8 +9,8 @@ LABEL maintainer="Konstantinos Samaras-Tsakiris <kosamara@cern.ch>" \
       atomic.type="system" \
       architecture="x86_64"
 
-ARG KERNEL_VERSION=4.15.4-300.fc27.x86_64
-ARG NVIDIA_DRIVER_VERSION=415.18
+ARG KERNEL_VERSION=4.19.3-300.fc29.x86_64
+ARG NVIDIA_DRIVER_VERSION=430.50
 #ARG SELinux_ENABLED
 
 RUN dnf -y update
@@ -91,7 +91,7 @@ ENV NVIDIA_MODULES_PATH ${NVIDIA_LIB_PATH}/modules/${KERNEL_VERSION}/kernel/driv
 COPY --from=kmod_builder /opt/nvidia/build ${NVIDIA_PATH}
 COPY scripts/nvidia-mkdevs.sh ${NVIDIA_BIN_PATH}/nvidia-mkdevs
 
-RUN mkdir /lib/modules && \
+RUN mkdir -p /lib/modules && \
     cp -rf ${NVIDIA_PATH}/lib/modules/${KERNEL_VERSION} /lib/modules/${KERNEL_VERSION}
 
 ENV PATH $PATH:${NVIDIA_BIN_PATH}
