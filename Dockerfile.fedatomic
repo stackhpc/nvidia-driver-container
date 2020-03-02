@@ -1,31 +1,29 @@
 # Nvidia driver installer for Fedora Atomic
 
-ARG FEDORA_VERSION=29
+ARG FEDORA_VERSION=31
 
 FROM fedora:${FEDORA_VERSION} as kmod_builder
-LABEL maintainer="Konstantinos Samaras-Tsakiris <kosamara@cern.ch>" \
+LABEL maintainer="Cloud Infrastructure <cloud-infrastructure-3rd-level@cern.ch" \
       name="nvidia-driver-installer" \
       version="0.2" \
       atomic.type="system" \
       architecture="x86_64"
 
-ARG KERNEL_VERSION=4.19.3-300.fc29.x86_64
-ARG NVIDIA_DRIVER_VERSION=430.50
+ARG KERNEL_VERSION=5.4.8-200.fc31.x86_64
+ARG NVIDIA_DRIVER_VERSION=440.64
 #ARG SELinux_ENABLED
 
 RUN dnf -y update
 
 RUN dnf -y install curl git binutils cpp gcc koji bc make pkgconfig pciutils unzip \
-      elfutils-libelf-devel openssl-devel module-init-tools && \
-    dnf -y autoremove && \
-    koji download-build --rpm --arch=x86_64 kernel-core-${KERNEL_VERSION} && \
-    koji download-build --rpm --arch=x86_64 kernel-devel-${KERNEL_VERSION} && \
-    koji download-build --rpm --arch=x86_64 kernel-modules-${KERNEL_VERSION} && \
-    koji download-build --rpm --arch=x86_64 kernel-headers-${KERNEL_VERSION} && \
-    dnf install -y kernel-core-${KERNEL_VERSION}.rpm \
+      elfutils-libelf-devel openssl-devel module-init-tools
+
+RUN curl -O https://kojipkgs.fedoraproject.org//packages/kernel/5.4.8/200.fc31/x86_64/kernel-devel-5.4.8-200.fc31.x86_64.rpm && \
+    curl -O https://kojipkgs.fedoraproject.org//packages/kernel/5.4.8/200.fc31/x86_64/kernel-core-5.4.8-200.fc31.x86_64.rpm && \
+    curl -O https://kojipkgs.fedoraproject.org//packages/kernel/5.4.8/200.fc31/x86_64/kernel-modules-5.4.8-200.fc31.x86_64.rpm && \
+    dnf localinstall -y kernel-core-${KERNEL_VERSION}.rpm \
       kernel-devel-${KERNEL_VERSION}.rpm \
-      kernel-modules-${KERNEL_VERSION}.rpm \
-      kernel-headers-${KERNEL_VERSION}.rpm && \
+      kernel-modules-${KERNEL_VERSION}.rpm && \
     dnf clean all
 
 ENV NVIDIA_DRIVER_URL "http://download.nvidia.com/XFree86/Linux-x86_64/${NVIDIA_DRIVER_VERSION}/NVIDIA-Linux-x86_64-${NVIDIA_DRIVER_VERSION}.run"

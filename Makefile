@@ -1,6 +1,6 @@
-FEDORA_VERSION = 29
-KERNEL_VERSION = "4.19.3-300.fc29.x86_64"
-NVIDIA_DRIVER_VERSION="430.50" 
+FEDORA_VERSION = 31
+KERNEL_VERSION = "5.4.8-200.fc31.x86_64"
+NVIDIA_DRIVER_VERSION="440.64" 
 
 CONTAINER_TAG ?= gitlab-registry.cern.ch/cloud/atomic-system-containers/nvidia-driver-installer:$(FEDORA_VERSION)-$(KERNEL_VERSION)-$(NVIDIA_DRIVER_VERSION)
 
@@ -23,7 +23,7 @@ build: validate
 		--build-arg KERNEL_VERSION=$(KERNEL_VERSION) \
 		--build-arg NVIDIA_DRIVER_VERSION=$(NVIDIA_DRIVER_VERSION) \
 		--tag $(CONTAINER_TAG) \
-		--file Dockerfile .
+		--file Dockerfile.fedatomic .
 
 push: build
 	if [ "$(DOCKER_USERNAME)" != "" ]; then \
