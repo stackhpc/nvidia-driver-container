@@ -1,0 +1,44 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  REPO: "registry.cern.ch/magnum"
+  IMAGE: "fedora"
+  FEDORA_VERSION: "31"
+  KERNEL_VERSION: "5.4.8-200.fc31.x86_64"
+
+before_script:
+  - set -e
+  - export FEDORA_VERSION=${FEDORA_VERSION}
+  - export NVIDIA_LATEST=$(wget -qO- https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt)
+  - export NVIDIA_DRIVER_VERSION=$(echo ${NVIDIA_LATEST} | cut -f1 -d ' ')
+  - export CONTAINER_TAG=${REPO}/nvidia-driver-installer/nvidia-driver-installer-${IMAGE}:${FEDORA_VERSION}-${KERNEL_VERSION}-${NVIDIA_DRIVER_VERSION}
+  - export ARCH=$(echo ${KERNEL_VERSION} | rev | cut -f1 -d'.' | rev)
+
+build:nvidia-driver:
+  stage: build
+  image:
+    name: gitlab-registry.cern.ch/ci-tools/docker-image-builder:latest
+    entrypoint: [""]
+  artifacts:
+    paths:
+      - build/nvidia
+    expire_in: 1 month
+  script:
+    - mkdir -p /kaniko/.docker
+    # - echo "{\"auths\":{\"${REPO}\":{\"auth\":\"$(echo -n 'robot$gitlab-pusher':${HARBOR_ROBOT_TOKEN} | base64)\"}}}" > /kaniko/.docker/config.json
+    # - /kaniko/executor --context $CI_PROJECT_DIR --destination ${CONTAINER_TAG} --dockerfile $CI_PROJECT_DIR/Dockerfile.${IMAGE} --build-arg FEDORA_VERSION=${FEDORA_VERSION} --build-arg KERNEL_VERSION=${KERNEL_VERSION} --build-arg NVIDIA_DRIVER_VERSION=${NVIDIA_DRIVER_VERSION} --build-arg ARCH=${ARCH}
+    - /kaniko/executor --context $CI_PROJECT_DIR --no-push --dockerfile $CI_PROJECT_DIR/Dockerfile.${IMAGE} --build-arg FEDORA_VERSION=${FEDORA_VERSION} --build-arg KERNEL_VERSION=${KERNEL_VERSION} --build-arg NVIDIA_DRIVER_VERSION=${NVIDIA_DRIVER_VERSION} --build-arg ARCH=${ARCH}
+
+deploy:nvidia-driver-container:
+  stage: deploy
+  image: gitlab-registry.cern.ch/ci-tools/docker-image-builder:latest
+  variables:
+    TO: "$CI_REGISTRY/nvidia-driver-installer/nvidia-driver-installer-${IMAGE}:${FEDORA_VERSION}-${KERNEL_VERSION}-${NVIDIA_DRIVER_VERSION}"
+    CONTEXT_DIR: "./"
+  script: "echo"
+  only:
+    - tags
+  dependencies:
+    - build:nvidia-driver
