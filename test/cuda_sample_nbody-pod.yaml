@@ -5,11 +5,20 @@ metadata:
 spec:
   restartPolicy: OnFailure
   containers:
-    - name: cuda-sample-nbody
-      # https://github.com/kubernetes/kubernetes/blob/v1.7.11/test/images/nvidia-cuda/Dockerfile
-      #image: "k8s.gcr.io/cuda-vector-add:v0.1"
-      image: "nvcr.io/nvidia/k8s/cuda-sample:nbody"
-      command: ["nbody", "-benchmark", "-numbodies=204800"]
-      resources:
-        limits:
-          nvidia.com/gpu: 1 # requesting 1 GPU
+  - name: cuda-sample-nbody
+    image: "nvcr.io/nvidia/k8s/cuda-sample:nbody"
+    command: ["nbody", "-benchmark", "-numbodies=204800"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+    volumeMounts:
+    - name: device-plugin
+      mountPath: /device-plugin
+    - name: dev
+      mountPath: /dev
+    securityContext:
+      privileged: true
+  volumes:
+  - name: dev
+    hostPath:
+      path: /dev
