@@ -35,12 +35,13 @@ spec:
         hostPath:
           path: /dev
       initContainers:
-      - image: "gitlab-registry.cern.ch/cloud-infrastructure/nvidia-driver-container/nvidia-driver-installer-fedora:27-4.15.4-300-415.18"
+      - image: "ghcr.io/stackhpc/nvidia-driver-installer:5.8.15-201.fc32.x86_64-455.28"
         imagePullPolicy: Always
         name: nvidia-driver-installer
         resources:
           requests:
             cpu: 0.15
+            memory: 200Mi
         securityContext:
           privileged: true
         volumeMounts:
@@ -55,10 +56,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 10Mi
+            memory: 50Mi
           limits:
             cpu: 50m
-            memory: 10Mi
+            memory: 50Mi
         securityContext:
           privileged: true
         volumeMounts:

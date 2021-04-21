@@ -1,11 +1,11 @@
-FEDORA_VERSION = 31
-KERNEL_VERSION = 5.4.8-200.fc31.x86_64
+FEDORA_VERSION = 32
+KERNEL_VERSION = 5.8.15-201.fc32.x86_64
 ARCH = x86_64
 NVIDIA_DRIVER_VERSION = 455.28
 
 IMAGE ?= fedora
 
-export CONTAINER_TAG ?= gitlab-registry.cern.ch/cloud/atomic-system-containers/nvidia-driver-installer:$(FEDORA_VERSION)-$(KERNEL_VERSION)-$(NVIDIA_DRIVER_VERSION)
+export CONTAINER_TAG ?= ghcr.io/stackhpc/nvidia-driver-installer:$(KERNEL_VERSION)-$(NVIDIA_DRIVER_VERSION)
 
 validate:
 	@if [ -z "$(NVIDIA_DRIVER_VERSION)" ]; then \
