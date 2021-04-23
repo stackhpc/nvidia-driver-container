@@ -7,9 +7,6 @@ spec:
   containers:
   - name: cuda-vectoradd
     image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda10.2
-    command:
-      - "sleep"
-      - "10000"
     resources:
       limits:
          nvidia.com/gpu: 1

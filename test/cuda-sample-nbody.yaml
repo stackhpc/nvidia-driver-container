@@ -6,9 +6,6 @@ spec:
   restartPolicy: OnFailure
   containers:
   - name: cuda-sample-nbody
-    securityContext:
-      seLinuxOptions:
-        type: container_t
     image: "nvcr.io/nvidia/k8s/cuda-sample:nbody"
     command: ["/tmp/nbody", "-benchmark", "-numbodies=204800"]
     resources:
