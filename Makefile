@@ -1,11 +1,10 @@
 FEDORA_VERSION = 32
 KERNEL_VERSION = 5.8.15-201.fc32.x86_64
 ARCH = x86_64
-NVIDIA_DRIVER_VERSION = 455.28
-
+NVIDIA_DRIVER_VERSION = 460.32.03
 IMAGE ?= fedora
 
-export CONTAINER_TAG ?= ghcr.io/stackhpc/nvidia-driver-installer:$(KERNEL_VERSION)-$(NVIDIA_DRIVER_VERSION)
+export CONTAINER_TAG ?= ghcr.io/stackhpc/nvidia-driver-installer:$(NVIDIA_DRIVER_VERSION)-$(KERNEL_VERSION)
 
 validate:
 	@if [ -z "$(NVIDIA_DRIVER_VERSION)" ]; then \
@@ -29,10 +28,14 @@ build: validate
 	  --tag $(CONTAINER_TAG) \
 	  --file Dockerfile.$(IMAGE) .
 
-push: build
+login:
+	echo "Username: $(DOCKER_USERNAME)"
+	echo "Password: $(DOCKER_PASSWORD)"
 	if [ "$(DOCKER_USERNAME)" != "" ]; then \
-		echo "$(DOCKER_PASSWORD)" | docker login --username="$(DOCKER_USERNAME)" --password-stdin; \
+		echo "$(DOCKER_PASSWORD)" | docker login --username="$(DOCKER_USERNAME)" --password-stdin $(CONTAINER_TAG); \
 	fi; \
+
+push: build login
 	docker push $(CONTAINER_TAG)
 
-.PHONY: validate build push
+.PHONY: validate build login push
