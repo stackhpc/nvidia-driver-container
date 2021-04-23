@@ -68,12 +68,13 @@ plugin:
 
 installer:
   image:
-    name: gitlab-registry.cern.ch/cloud/atomic-system-containers/nvidia-driver-installer
+    name: ghcr.io/stackhpc/nvidia-driver-installer
     pullPolicy: IfNotPresent
-    tag: 31-5.4.8-200.fc31.x86_64-440.64
+    tag: 460.32.03-5.8.15-201.fc32.x86_64
   imagePullSecrets: []
   securityContext:
     privileged: true
+
   resources: {}
 
 serviceAccount:
