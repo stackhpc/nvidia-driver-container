@@ -1,0 +1,95 @@
+nameOverride: ""
+fullnameOverride: ""
+
+plugin:
+  image:
+    name: k8s.gcr.io/nvidia-gpu-device-plugin@sha256
+    pullPolicy: IfNotPresent
+    tag: 0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e
+  imagePullSecrets: []
+  securityContext:
+    privileged: true
+  resources: {}
+
+  metrics:
+    enabled: true
+    port: 9445
+
+    image:
+      name: gitlab-registry.cern.ch/cloud/atomic-system-containers/nvidia_gpu_prometheus_exporter
+      pullPolicy: IfNotPresent
+      tag: 0.1
+    imagePullSecrets: []
+
+    env:
+    # Path to libnvidia-ml.so
+    - name: LD_LIBRARY_PATH
+      value: /opt/nvidia-driver/lib64
+
+    securityContext:
+      privileged: true
+
+    resources:
+      requests:
+        cpu: 20m
+        memory: 20M
+      limits:
+        cpu: 20m
+        memory: 20M
+
+    ## Configuration for NVIDIA-GPU-METRICS-EXPORTER service
+    ##
+    service:
+      annotations: {}
+      # prometheus.io/scrape: "true"
+      # prometheus.io/port: "10254"
+      labels: {}
+      ## The port of the service
+      ##
+      servicePort: 9445
+
+    serviceMonitor:
+      enabled: true
+      additionalLabels: {}
+      namespace: ""
+      namespaceSelector: {}
+      # Default: scrape .Release.Namespace only
+      # To scrape all, use the following:
+      # namespaceSelector:
+      #   any: true
+      scrapeInterval: 30s
+      # honorLabels: true
+
+    prometheusRule:
+      enabled: false
+      additionalLabels: {}
+      namespace: ""
+      rules: []
+
+installer:
+  image:
+    name: gitlab-registry.cern.ch/cloud/atomic-system-containers/nvidia-driver-installer
+    pullPolicy: IfNotPresent
+    tag: 31-5.4.8-200.fc31.x86_64-440.64
+  imagePullSecrets: []
+  securityContext:
+    privileged: true
+  resources: {}
+
+serviceAccount:
+  create: true
+  name: nvidia-gpu
+
+rbac:
+  create: true
+
+nodeSelector:
+  node-role.kubernetes.io/gpu: "true"
+
+priorityClassName: system-node-critical
+
+tolerations:
+- effect: NoExecute
+  operator: Exists
+- effect: NoSchedule
+  operator: Exists

@@ -1,0 +1,22 @@
+{{- if and .Values.plugin.metrics.enabled .Values.plugin.metrics.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nvidia-gpu-metrics
+  {{- if .Values.plugin.metrics.prometheusRule.namespace }}
+  namespace: {{ .Values.plugin.metrics.prometheusRule.namespace }}
+  {{- end }}
+  labels:
+    k8s-app: nvidia-gpu-device-plugin
+    chart: nvidia-gpu
+    release: {{ .Release.Name }}
+    {{- if .Values.plugin.metrics.prometheusRule.additionalLabels }}
+      {{ toYaml .Values.plugin.metrics.prometheusRule.additionalLabels | indent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.plugin.metrics.prometheusRule.rules }}
+  groups:
+  - name: nvidia-gpu-metrics
+    rules: {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

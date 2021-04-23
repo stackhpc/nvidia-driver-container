@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+    k8s-app: nvidia-gpu-device-plugin
+    chart: nvidia-gpu
+    release: {{ .Release.Name }}
+  name: nvidia-gpu-device-plugin
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: nvidia-gpu-device-plugin
+      chart: nvidia-gpu
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        k8s-app: nvidia-gpu-device-plugin
+        chart: nvidia-gpu
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - command:
+        - /usr/bin/nvidia-gpu-device-plugin
+        - -logtostderr
+        - -host-path=/opt/nvidia-driver
+        image: {{ .Values.plugin.image.name }}:{{ .Values.plugin.image.tag }}
+        imagePullPolicy: {{ .Values.plugin.image.pullPolicy }}
+        name: nvidia-gpu-device-plugin
+        resources:
+          {{- toYaml .Values.plugin.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.plugin.securityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /device-plugin
+          name: device-plugin
+        - mountPath: /dev
+          name: dev
+      {{- if .Values.plugin.metrics.enabled }}
+      - command:
+        - /nvidia_gpu_prometheus_exporter
+        name: nvidia-gpu-metrics-exporter
+        image: {{ .Values.plugin.metrics.image.name }}:{{ .Values.plugin.metrics.image.tag }}
+        imagePullPolicy: {{ .Values.plugin.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.plugin.metrics.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.plugin.metrics.securityContext | nindent 10 }}
+        env:
+          {{- toYaml .Values.plugin.metrics.env | nindent 10 }}
+        ports:
+        - containerPort: 9445
+          name: metrics
+        volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: nvidia-install-dir-host
+          mountPath: /opt/nvidia-driver
+      {{- end }}
+      initContainers:
+      - image: {{ .Values.installer.image.name }}:{{ .Values.installer.image.tag }}
+        imagePullPolicy: {{ .Values.installer.image.policy }}
+        name: nvidia-driver-installer
+        resources:
+          {{- toYaml .Values.installer.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.installer.securityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /opt/nvidia-host
+          name: nvidia-install-dir-host
+        - mountPath: /dev
+          name: dev
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - hostPath:
+          path: /var/lib/kubelet/device-plugins
+          type: ""
+        name: device-plugin
+      - hostPath:
+          path: /opt/nvidia-driver
+          type: ""
+        name: nvidia-install-dir-host
+      - hostPath:
+          path: /dev
+          type: ""
+        name: dev

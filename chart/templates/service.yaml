@@ -1,0 +1,31 @@
+{{- if .Values.plugin.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.plugin.metrics.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.plugin.metrics.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  labels:
+    k8s-app: nvidia-gpu-device-plugin
+    chart: nvidia-gpu
+    release: {{ .Release.Name }}
+    {{- if .Values.plugin.metrics.service.labels }}
+    {{ toYaml .Values.plugin.metrics.service.labels | indent 4 }}
+    {{- end }}
+  name: nvidia-gpu-metrics
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: metrics
+    port: {{ .Values.plugin.metrics.service.servicePort }}
+    protocol: TCP
+    targetPort: metrics
+  selector:
+    k8s-app: nvidia-gpu-device-plugin
+    chart: nvidia-gpu
+    release: {{ .Release.Name }}
+  type: ClusterIP
+{{- end }}
