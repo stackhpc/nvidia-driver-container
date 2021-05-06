@@ -30,18 +30,9 @@ Build and push the image:
 
 ## Helm Chart
 
-To install the chart (you can change the namespace or release appropriately):
+To install the chart to `kube-system` namespace:
 
-    helm install --namespace=kube-system --name=nvidia-gpu ./chart/
-
-You can override the defaults with an additional configuration file:
-
-    helm install --namespace=kube-system --name=nvidia-gpu ./chart/ -f myconfig.yaml
-
-By default the DaemonSet handling the driver will only install on nodes with
-the `gpu=true` label. You can override this with the `nodeSelector` in values.
-
-    kubectl label node <node-name> node-role.kubernetes.io/gpu=true
+    make install
 
 ## Test workflow
 

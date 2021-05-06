@@ -13,11 +13,11 @@ load the Nvidia GPU device drivers on a Kubernetes cluster.
 
 To install the chart (you can change the namespace or release appropriately):
 
-    helm install --namespace=kube-system --name=nvidia-gpu ./chart/
+    helm install --namespace=kube-system nvidia-gpu ./
 
 You can override the defaults with an additional configuration file:
 
-    helm install --namespace=kube-system --name=nvidia-gpu ./chart/ -f myconfig.yaml
+    helm upgrade --install --namespace=kube-system nvidia-gpu ./ -f myconfig.yaml
 
 By default the DaemonSet handling the driver will only install on nodes with
 the `gpu=true` label. You can override this with the `nodeSelector` in values.
