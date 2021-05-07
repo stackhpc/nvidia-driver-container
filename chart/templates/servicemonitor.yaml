@@ -9,7 +9,7 @@ metadata:
   labels:
     k8s-app: nvidia-gpu-device-plugin
     chart: nvidia-gpu
-    release: prometheus-operator
+    release: {{ .Values.metrics.serviceMonitor.release }}
     {{- if .Values.plugin.metrics.serviceMonitor.additionalLabels }}
     {{ toYaml .Values.plugin.metrics.serviceMonitor.additionalLabels | indent 4 }}
     {{- end }}

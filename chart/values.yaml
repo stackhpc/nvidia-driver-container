@@ -59,6 +59,7 @@ plugin:
       #   any: true
       scrapeInterval: 30s
       # honorLabels: true
+      release: magnum # by default, Prometheus deployed by Magnum is under this release
 
     prometheusRule:
       enabled: false
@@ -83,9 +84,9 @@ serviceAccount:
 
 rbac:
   create: true
-
 nodeSelector:
-  node-role.kubernetes.io/gpu: "true"
+  magnum.openstack.org/nodegroup: "gpu"
+  #node-role.kubernetes.io/gpu: "true"
 
 priorityClassName: system-node-critical
 
