@@ -85,7 +85,7 @@ serviceAccount:
 rbac:
   create: true
 nodeSelector:
-  magnum.openstack.org/nodegroup: "gpu"
+  magnum.openstack.org/role: "gpu"
   #node-role.kubernetes.io/gpu: "true"
 
 priorityClassName: system-node-critical
