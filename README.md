@@ -1,4 +1,7 @@
-# nvidia-driver-container
+# nvidia-driver-container (ARCHIVED)
+
+**This repository is now archived. Please use
+<https://github.com/stackhpc/gpu-operator-driver> instead.**
 
 The nvidia-driver-installer container for Fedora CoreOS is built from this repo
 and available at: <https://ghcr.io/stackhpc/nvidia-driver-installer>.
